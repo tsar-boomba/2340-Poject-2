@@ -8,11 +8,13 @@ android {
 
     defaultConfig {
         applicationId = "com.example.spotifywrapped"
-        minSdk = 27
+        minSdk = 33
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
+        manifestPlaceholders["redirectSchemeName"] = "spotifywrapped"
+        manifestPlaceholders["redirectHostName"] = "auth"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -29,7 +31,8 @@ android {
 }
 
 dependencies {
-
+    implementation("com.spotify.android:auth:2.1.1")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
