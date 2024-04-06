@@ -18,7 +18,7 @@ public interface UserDao {
     List<User> loadAllByIds(int[] userIds);
 
     @Query("SELECT * FROM user WHERE username LIKE :first")
-    User findByName(String first, String last);
+    User findByName(String firstName, String lastName);
 
     @Insert
     void insertAll(User... users);
