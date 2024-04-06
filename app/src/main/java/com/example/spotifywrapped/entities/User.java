@@ -9,6 +9,12 @@ public class User {
     @PrimaryKey
     public int uid;
 
+    @ColumnInfo(name = "firstName")
+    public String firstName;
+
+    @ColumnInfo(name = "lastName")
+    public String lastName;
+
     @ColumnInfo(name = "username")
     public String username;
 
