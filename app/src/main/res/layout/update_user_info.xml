@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -94,7 +95,7 @@
         android:layout_marginStart="28dp"
         android:layout_marginBottom="323dp"
         android:backgroundTint="#00FF00"
-        android:text="Update"
+        android:text="Update Info"
         android:textColor="#000000"
         android:textColorHighlight="#000000"
         android:textColorHint="#000000"
@@ -106,5 +107,38 @@
         app:layout_constraintStart_toStartOf="@+id/space4"
         app:layout_constraintTop_toBottomOf="@+id/space4"
         app:strokeColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="67dp"
+        android:layout_height="62dp"
+        android:layout_marginStart="172dp"
+        android:layout_marginTop="64dp"
+        android:layout_marginEnd="172dp"
+        android:layout_marginBottom="51dp"
+        android:text="OR"
+        android:textColor="#FFFFFF"
+        android:textSize="48sp"
+        app:layout_constraintBottom_toTopOf="@+id/buttonDelete"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonUpdate" />
+
+    <Button
+        android:id="@+id/buttonDelete"
+        android:layout_width="345dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="34dp"
+        android:layout_marginBottom="95dp"
+        android:backgroundTint="#00FF00"
+        android:text="Delete ALL INFO"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
