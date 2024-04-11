@@ -17,8 +17,8 @@ public interface UserDao {
     @Query("SELECT * FROM user WHERE uid IN (:userIds)")
     List<User> loadAllByIds(int[] userIds);
 
-    @Query("SELECT * FROM user WHERE username LIKE :first")
-    User findByName(String firstName, String lastName);
+    @Query("SELECT * FROM user WHERE username IS :username")
+    User findByUsername(String username);
 
     @Insert
     void insertAll(User... users);
