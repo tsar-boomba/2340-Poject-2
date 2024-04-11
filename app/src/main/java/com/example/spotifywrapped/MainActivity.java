@@ -9,15 +9,19 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.room.Room;
 
 import com.example.spotifywrapped.spotify.Spotify;
 
 public class MainActivity extends AppCompatActivity {
+    private AppDatabase db;
     private final Spotify spotify = new Spotify();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        db = Room.databaseBuilder(this, AppDatabase.class, "db").build();
 
         SwitchCompat switchCompat = findViewById(R.id.switchCompat);
         SharedPreferences sharedPreferences = getSharedPreferences("night",0);
@@ -58,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
         return spotify;
     }
 
+    public AppDatabase getDb() {
+        return db;
+    }
+
     public void getCode() {
         spotify.getCode(this);
     }
@@ -69,5 +77,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        db.close();
+        db = null;
     }
 }
