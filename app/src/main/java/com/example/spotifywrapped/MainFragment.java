@@ -41,6 +41,7 @@ public class MainFragment extends Fragment {
     private LoadingOverlay loadingOverlay;
     private Spotify spotify;
     private AppDatabase db;
+    private String token;
     private User user;
 
     public static MainFragment newInstance() {
@@ -50,20 +51,6 @@ public class MainFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        unblock(() -> {
-            // Load in top tracks for one month
-            if (spotify == null) return;
-            spotify.getTopTracks(requireActivity(), Timeframe.ONE_MONTH, (oneMonth) -> {
-                viewModel.setOneMonthTracks(oneMonth.get());
-                spotify.getTopTracks(requireActivity(), Timeframe.SIX_MONTHS, (sixMonths) -> {
-                    viewModel.setSixMonthTracks(sixMonths.get());
-                    spotify.getTopTracks(requireActivity(), Timeframe.ONE_YEAR, (oneYear) -> {
-                        viewModel.setOneYearTracks(oneYear.get());
-                    });
-                });
-            });
-        });
     }
 
     @Override
@@ -76,13 +63,36 @@ public class MainFragment extends Fragment {
         db = activity.getDb();
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
+        unblock(() -> {
+            // Load in top tracks for one month
+            if (spotify == null) {
+                if (token != null) {
+                    spotify = ((MainActivity) requireActivity()).createSpotifyFromToken(token);
+                } else {
+                    throw new RuntimeException("Lost Spotify client!");
+                }
+            };
+            spotify.getTopTracks(requireActivity(), Timeframe.ONE_MONTH, (oneMonth) -> {
+                viewModel.setOneMonthTracks(oneMonth.get());
+                spotify.getTopTracks(requireActivity(), Timeframe.SIX_MONTHS, (sixMonths) -> {
+                    viewModel.setSixMonthTracks(sixMonths.get());
+                    spotify.getTopTracks(requireActivity(), Timeframe.ONE_YEAR, (oneYear) -> {
+                        viewModel.setOneYearTracks(oneYear.get());
+                    });
+                });
+            });
+        });
+
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        user = MainFragmentArgs.fromBundle(getArguments()).getUser();
+        MainFragmentArgs args = MainFragmentArgs.fromBundle(getArguments());
+        user = args.getUser();
+        token = args.getToken();
+
         final AtomicReference<Timeframe> timeframe = new AtomicReference<>(Timeframe.ONE_MONTH);
 
         binding.createWrappedButton.setOnClickListener((e) -> {

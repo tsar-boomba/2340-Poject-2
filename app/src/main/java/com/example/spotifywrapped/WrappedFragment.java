@@ -45,7 +45,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -55,13 +54,12 @@ import okhttp3.Request;
 
 public class WrappedFragment extends Fragment {
     private static final String TAG = "WrappedFragment";
+    private static final String GEMINI = "AIzaSyCHZHjXLwmeYgmwdQ1sFKqwTsnemEpTFXg";
     private WrappedViewModel viewModel;
     private FragmentWrappedBinding binding;
     private LoadingOverlay loadingOverlay;
     private AppDatabase db;
     private Spotify spotify;
-
-    private static final String GEMINI = "AIzaSyCHZHjXLwmeYgmwdQ1sFKqwTsnemEpTFXg";
     private boolean saved = false;
 
     public static WrappedFragment newInstance() {
@@ -214,7 +212,7 @@ public class WrappedFragment extends Fragment {
                             db.userDao().update(user);
 
                             requireActivity().runOnUiThread(() -> {
-                                NavDirections nav = WrappedFragmentDirections.actionWrappedFragmentToMainFragment(user);
+                                NavDirections nav = WrappedFragmentDirections.actionWrappedFragmentToMainFragment(user, null);
                                 Navigation.findNavController(getView()).navigate(nav);
                             });
                         } finally {
@@ -266,15 +264,15 @@ public class WrappedFragment extends Fragment {
         if (category == 0) {
             // Tracks
             Track track = wrapped.topTracks[rand.nextInt(wrapped.topTracks.length)];
-            return "What's a food to go with " + track.name + "?";
+            return "What's some food to eat while listening to " + track.name + " by " + String.join(", ", Arrays.stream(track.artists).map((a) -> a.name).toArray(String[]::new));
         } else if (category == 1) {
             // Artists
             Artist artist = wrapped.topArtists[rand.nextInt(wrapped.topArtists.length)];
-            return "What's a " + artist.name + " fan's favorite color?";
+            return "What's a fan of " + artist.name + "'s music's favorite color?";
         } else {
             // Genres
             String genre = wrapped.topGenres[rand.nextInt(wrapped.topGenres.length)];
-            return "What's a " + genre + " fan's favorite sense of style?";
+            return "What's outfit would a fan of the " + genre + " genre wear?";
         }
     }
 

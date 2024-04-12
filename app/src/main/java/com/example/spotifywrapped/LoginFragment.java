@@ -114,7 +114,7 @@ public class LoginFragment extends Fragment {
                 unblock(() -> {
                     User user = db.userDao().getAll().get(0);
                     requireActivity().runOnUiThread(() -> {
-                        NavDirections navigation = LoginFragmentDirections.actionLoginFragmentToMainFragment(user);
+                        NavDirections navigation = LoginFragmentDirections.actionLoginFragmentToMainFragment(user, token.get());
                         Navigation.findNavController(getView()).navigate(navigation);
                     });
                 });
@@ -173,7 +173,7 @@ public class LoginFragment extends Fragment {
                 unblock(() -> {
                     User user = db.userDao().getAll().get(0);
                     requireActivity().runOnUiThread(() -> {
-                        NavDirections navigation = LoginFragmentDirections.actionLoginFragmentToMainFragment(user);
+                        NavDirections navigation = LoginFragmentDirections.actionLoginFragmentToMainFragment(user, token.get());
                         Navigation.findNavController(getView()).navigate(navigation);
                     });
                 });

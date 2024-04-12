@@ -50,6 +50,10 @@
         <action
             android:id="@+id/action_mainFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <argument
+            android:name="token"
+            app:argType="string"
+            app:nullable="true" />
     </fragment>
 
     <fragment

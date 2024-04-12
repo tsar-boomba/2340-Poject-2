@@ -22,7 +22,7 @@ import com.example.spotifywrapped.spotify.Spotify;
 
 public class MainActivity extends AppCompatActivity {
     private AppDatabase db;
-    private final Spotify spotify = new Spotify();
+    private Spotify spotify = new Spotify();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,5 +100,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         db = null;
+    }
+
+    public Spotify createSpotifyFromToken(String token) {
+        spotify = new Spotify();
+        spotify.setAccessToken(token);
+        return spotify;
     }
 }

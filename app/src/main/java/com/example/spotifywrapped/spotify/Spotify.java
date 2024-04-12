@@ -180,9 +180,11 @@ public class Spotify implements DefaultLifecycleObserver {
             queryString.append('&');
         }
 
+        String fullUrl = "https://api.spotify.com/v1" + endpoint + queryString;
+
         call = httpClient.newCall(new Request.Builder()
                 .get()
-                .url("https://api.spotify.com/v1" + endpoint + queryString.toString())
+                .url(fullUrl)
                 .addHeader("Authorization", "Bearer " + accessToken)
                 .build()
         );
@@ -204,6 +206,7 @@ public class Spotify implements DefaultLifecycleObserver {
 
                 try {
                     T res = gson.fromJson(response.body().charStream(), classOfT);
+                    Log.i(TAG, "Completed request successfully: " + fullUrl);
                     callback.accept(Optional.of(res));
                 } catch (JsonSyntaxException e) {
                     callback.accept(Optional.empty());
@@ -218,5 +221,9 @@ public class Spotify implements DefaultLifecycleObserver {
         if (call != null) {
             call.cancel();
         }
+    }
+
+    public void setAccessToken(String token) {
+        accessToken = token;
     }
 }
