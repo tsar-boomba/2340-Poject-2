@@ -1,5 +1,7 @@
 package com.example.spotifywrapped;
 
+import android.util.Pair;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -9,7 +11,7 @@ import java.util.Optional;
 
 public class WrappedViewModel extends ViewModel {
     private MutableLiveData<Optional<Wrapped>> wrapped = new MutableLiveData<>();
-    private MutableLiveData<String> message = new MutableLiveData<>();
+    private MutableLiveData<Pair<String, String>> message = new MutableLiveData<>();
 
     public MutableLiveData<Optional<Wrapped>> getWrapped() {
         return wrapped;
@@ -19,11 +21,11 @@ public class WrappedViewModel extends ViewModel {
         this.wrapped.postValue(wrapped);
     }
 
-    public MutableLiveData<String> getMessage() {
+    public MutableLiveData<Pair<String, String>> getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
+    public void setMessage(Pair<String, String> message) {
         this.message.postValue(message);
     }
 }

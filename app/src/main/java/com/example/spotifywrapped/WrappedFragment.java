@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,11 @@ import com.example.spotifywrapped.spotify.Spotify;
 import com.example.spotifywrapped.spotify.Timeframe;
 import com.example.spotifywrapped.spotify.TopTracks;
 import com.example.spotifywrapped.spotify.Track;
+import com.google.ai.client.generativeai.GenerativeModel;
+import com.google.ai.client.generativeai.java.GenerativeModelFutures;
+import com.google.ai.client.generativeai.type.Content;
+import com.google.ai.client.generativeai.type.GenerateContentResponse;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import com.mohamedabulgasem.loadingoverlay.LoadingAnimation;
 import com.mohamedabulgasem.loadingoverlay.LoadingOverlay;
@@ -39,6 +45,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import okhttp3.OkHttpClient;
@@ -51,7 +60,8 @@ public class WrappedFragment extends Fragment {
     private LoadingOverlay loadingOverlay;
     private AppDatabase db;
     private Spotify spotify;
-    private XMPPTask xmppTask;
+
+    private static final String GEMINI = "AIzaSyCHZHjXLwmeYgmwdQ1sFKqwTsnemEpTFXg";
     private boolean saved = false;
 
     public static WrappedFragment newInstance() {
@@ -61,17 +71,6 @@ public class WrappedFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        xmppTask = new XMPPTask() {
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                xmppTask.setMessageListener(message -> {
-                    viewModel.setMessage(message);
-                    loadingOverlay.dismiss();
-                });
-            }
-        };
-        xmppTask.execute();
     }
 
     @Override
@@ -101,13 +100,17 @@ public class WrappedFragment extends Fragment {
         viewModel.setWrapped(preMadeWrapped);
 
         viewModel.getMessage().observe(getViewLifecycleOwner(), (llmMessage) -> {
+            loadingOverlay.dismiss();
             if (llmMessage == null) {
                 return;
             }
 
+            String prompt = llmMessage.first;
+            String result = llmMessage.second;
+
             new AlertDialog.Builder(requireActivity())
                     .setTitle("The LLM Says")
-                    .setMessage(llmMessage)
+                    .setMessage("Prompt: " + prompt + "\n\n" + result)
                     .setPositiveButton("Awesome!", (d, i) -> {
                         d.dismiss();
                     })
@@ -221,8 +224,29 @@ public class WrappedFragment extends Fragment {
                 });
 
                 binding.askLlmButton.setOnClickListener((e) -> {
-                    xmppTask.sendMessage(getPrompt(wrapped));
                     loadingOverlay.show();
+
+                    unblock(() -> {
+                        try {
+                            GenerativeModel gm = new GenerativeModel("gemini-1.0-pro", GEMINI);
+                            GenerativeModelFutures generativeModelFutures = GenerativeModelFutures.from(gm);
+                            Executor executor = Executors.newSingleThreadExecutor();
+                            String prompt = getPrompt(wrapped);
+                            Content content = new Content.Builder().addText(prompt).build();
+                            ListenableFuture<GenerateContentResponse> fut = generativeModelFutures.generateContent(content);
+                            fut.addListener(() -> {
+                                try {
+                                    viewModel.setMessage(new Pair<>(prompt, fut.get().getText()));
+                                } catch (Exception ex) {
+                                    Log.e(TAG, "Problem getting LLM res: ", ex);
+                                    viewModel.setMessage(null);
+                                }
+                            }, executor);
+                        } catch (Exception ex) {
+                            Log.e(TAG, "Problem starting LLM: ", ex);
+                            viewModel.setMessage(null);
+                        }
+                    });
                 });
             } else {
                 // Asynchronously create wrapped from top tracks
@@ -267,7 +291,5 @@ public class WrappedFragment extends Fragment {
         super.onDestroy();
         binding = null;
         viewModel = null;
-        xmppTask.disconnect();
-        xmppTask = null;
     }
 }
