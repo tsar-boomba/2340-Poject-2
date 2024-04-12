@@ -17,10 +17,8 @@ import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -38,18 +36,40 @@ public class Spotify implements DefaultLifecycleObserver {
     public static final int AUTH_CODE_REQUEST_CODE = 1;
     private static final String TAG = "Spotify";
     private static final String REDIRECT_URI = "com.example.spotifywrapped://auth";
-    private final OkHttpClient httpClient = new OkHttpClient();
+    private final OkHttpClient httpClient = new OkHttpClient.Builder().connectTimeout(Duration.ofSeconds(5)).callTimeout(Duration.ofSeconds(10)).build();
     private final Gson gson;
     private String accessToken;
     private String accessCode;
     private String refreshToken;
     private Call call;
-    private Runnable onResult;
+    private Consumer<Optional<String>> onAuthResponse;
 
     public Spotify() {
         gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
+    }
+
+    /**
+     * Get authentication request
+     *
+     * @param type the type of the request
+     * @return the authentication request
+     */
+    private static AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
+        return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
+                .setShowDialog(false)
+                .setScopes(new String[]{"user-read-email", "user-top-read", "user-follow-read", "user-read-recently-played"}) // <--- Change the scope of your requested token here
+                .setCampaign("your-campaign-token").build();
+    }
+
+    /**
+     * Gets the redirect Uri for Spotify
+     *
+     * @return redirect Uri object
+     */
+    private static Uri getRedirectUri() {
+        return Uri.parse(REDIRECT_URI);
     }
 
     /**
@@ -74,8 +94,8 @@ public class Spotify implements DefaultLifecycleObserver {
         AuthorizationClient.openLoginActivity(activity, AUTH_CODE_REQUEST_CODE, request);
     }
 
-    public void setOnResult(Runnable onResult) {
-        this.onResult = onResult;
+    public void setOnAuthResponse(Consumer<Optional<String>> onAuthResponse) {
+        this.onAuthResponse = onAuthResponse;
     }
 
     /**
@@ -88,29 +108,52 @@ public class Spotify implements DefaultLifecycleObserver {
         // Check which request code is present (if any)
         if (AUTH_TOKEN_REQUEST_CODE == requestCode) {
             accessToken = response.getAccessToken();
+            if (onAuthResponse != null) {
+                onAuthResponse.accept(Optional.ofNullable(accessToken));
+            }
             Log.i(TAG, "Request token done! " + accessToken);
         } else if (AUTH_CODE_REQUEST_CODE == requestCode) {
             accessCode = response.getCode();
-            Log.i(TAG, "Request code done! " + accessCode);
+            if (onAuthResponse != null) {
+                onAuthResponse.accept(Optional.ofNullable(accessCode));
+            }
+            Log.i(TAG, "Request code done!");
         }
 
-        if (onResult != null) {
-            onResult.run();
-        }
     }
 
     /**
      * Get user profile
      * This method will get the user profile using the token
      */
-    public void getUser(Context context, Consumer<Optional<SpotifyMe>> callback) {
-        apiRequest(context, "/me", SpotifyMe.class, new HashMap<>(0), callback);
+    public void getUser(Context context, Consumer<Optional<Me>> callback) {
+        apiRequest(context, "/me", Me.class, new HashMap<>(0), callback);
     }
 
     public void getTopTracks(Context context, Timeframe timeframe, Consumer<Optional<TopTracks>> callback) {
         HashMap<String, String> query = new HashMap<>();
         query.put("time_range", timeframe.toApiParam());
+        query.put("limit", "50");
         apiRequest(context, "/me/top/tracks", TopTracks.class, query, callback);
+    }
+
+    public Optional<Artist> getArtistBlocking(String href) {
+        cancelCall();
+
+        call = httpClient.newCall(new Request.Builder()
+                .get()
+                .url(href)
+                .addHeader("Authorization", "Bearer " + accessToken)
+                .build()
+        );
+
+        try {
+            Response res = call.execute();
+            return Optional.of(gson.fromJson(res.body().charStream(), Artist.class));
+        } catch (Exception ex) {
+            Log.e(TAG, "getArtistBlocking: ", ex);
+            return Optional.empty();
+        }
     }
 
     private <T> void apiRequest(
@@ -147,8 +190,8 @@ public class Spotify implements DefaultLifecycleObserver {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "Failed to fetch data: " + e);
                 callback.accept(Optional.empty());
-                Log.d("HTTP", "Failed to fetch data: " + e);
                 Toast.makeText(context, "Failed to fetch data, watch Logcat for more details", Toast.LENGTH_SHORT).show();
             }
 
@@ -160,7 +203,7 @@ public class Spotify implements DefaultLifecycleObserver {
                 }
 
                 try {
-                    T res = gson.fromJson(response.body().string(), classOfT);
+                    T res = gson.fromJson(response.body().charStream(), classOfT);
                     callback.accept(Optional.of(res));
                 } catch (JsonSyntaxException e) {
                     callback.accept(Optional.empty());
@@ -169,28 +212,6 @@ public class Spotify implements DefaultLifecycleObserver {
                 }
             }
         });
-    }
-
-    /**
-     * Get authentication request
-     *
-     * @param type the type of the request
-     * @return the authentication request
-     */
-    private AuthorizationRequest getAuthenticationRequest(AuthorizationResponse.Type type) {
-        return new AuthorizationRequest.Builder(CLIENT_ID, type, getRedirectUri().toString())
-                .setShowDialog(false)
-                .setScopes(new String[]{"user-read-email", "user-top-read", "user-follow-read", "user-read-recently-played"}) // <--- Change the scope of your requested token here
-                .setCampaign("your-campaign-token").build();
-    }
-
-    /**
-     * Gets the redirect Uri for Spotify
-     *
-     * @return redirect Uri object
-     */
-    private Uri getRedirectUri() {
-        return Uri.parse(REDIRECT_URI);
     }
 
     private void cancelCall() {

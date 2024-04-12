@@ -2,7 +2,9 @@ package com.example.spotifywrapped.spotify;
 
 import androidx.annotation.NonNull;
 
-public enum Timeframe {
+import java.io.Serializable;
+
+public enum Timeframe implements Serializable {
     ONE_MONTH,
     SIX_MONTHS,
     ONE_YEAR;

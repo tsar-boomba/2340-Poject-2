@@ -2,7 +2,7 @@ package com.example.spotifywrapped.spotify;
 
 import androidx.annotation.NonNull;
 
-public class SpotifyMe {
+public class Me {
     public String displayName;
     public String email;
     public String href;

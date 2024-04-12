@@ -9,5 +9,57 @@
         android:id="@+id/loginFragment"
         android:name="com.example.spotifywrapped.LoginFragment"
         android:label="fragment_login"
-        tools:layout="@layout/fragment_login" />
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/wrappedFragment"
+        android:name="com.example.spotifywrapped.WrappedFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_wrapped" >
+        <argument
+            android:name="topTracks"
+            app:argType="string" />
+        <argument
+            android:name="wrapped"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="timeframe"
+            app:argType="com.example.spotifywrapped.spotify.Timeframe" />
+        <action
+            android:id="@+id/action_wrappedFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.spotifywrapped.MainFragment"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main"
+        >
+        <action
+            android:id="@+id/action_mainFragment_to_wrappedFragment"
+            app:destination="@id/wrappedFragment" />
+        <argument
+            android:name="user"
+            app:argType="com.example.spotifywrapped.entities.User" />
+        <action
+            android:id="@+id/action_mainFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.spotifywrapped.SettingsFragment"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main"
+        >
+        <action
+            android:id="@+id/action_settingsFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
 </navigation>

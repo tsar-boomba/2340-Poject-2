@@ -1,5 +1,7 @@
 package com.example.spotifywrapped;
 
+import static com.example.spotifywrapped.Utils.unblock;
+
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -27,9 +29,12 @@ public class XMPPTask extends AsyncTask<Void, Void, Void> {
                     .build();
             connection = new XMPPTCPConnection(config);
             connection.connect();
+            Log.i(TAG, "XMPP connecting...");
             connection.login();
+            Log.i(TAG, "XMPP logging in...");
             chatManager = ChatManager.getInstanceFor(connection);
             jid = JidCreate.entityBareFrom("ai@natecarr.xyz");
+            Log.i(TAG, "Ready to chat!");
             chatManager.addIncomingListener((from, message, chat) -> {
                 if (messageListener != null) {
                     messageListener.onMessageReceived(message.getBody());
@@ -45,6 +50,7 @@ public class XMPPTask extends AsyncTask<Void, Void, Void> {
             try {
                 Chat chat = chatManager.chatWith(jid);
                 chat.send(messageBody);
+                Log.i(TAG, "Sent prompt: " + messageBody);
             } catch (Exception e) {
                 Log.e(TAG, "Error sending message", e);
             }
@@ -55,7 +61,9 @@ public class XMPPTask extends AsyncTask<Void, Void, Void> {
 
     public void disconnect() {
         if (connection != null && connection.isConnected()) {
-            connection.disconnect();
+            unblock(() -> {
+                connection.disconnect();
+            });
         }
     }
     public interface MessageListener {
