@@ -2,6 +2,7 @@ package com.example.spotifywrapped;
 
 import static com.example.spotifywrapped.Utils.unblock;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -97,7 +98,12 @@ public class LoginFragment extends Fragment {
             return;
         }
 
-        requireActivity().runOnUiThread(() -> {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+
+        activity.runOnUiThread(() -> {
             if (binding != null) {
                 binding.createFirstNameContainer.setVisibility(View.GONE);
                 binding.createLastNameContainer.setVisibility(View.GONE);
@@ -154,7 +160,11 @@ public class LoginFragment extends Fragment {
     }
 
     private void setupCreate() {
-        requireActivity().runOnUiThread(() -> {
+        Activity activity = getActivity();
+        if (activity == null) {
+            return;
+        }
+        activity.runOnUiThread(() -> {
             if (binding != null) {
                 binding.createFirstNameContainer.setVisibility(View.VISIBLE);
                 binding.createLastNameContainer.setVisibility(View.VISIBLE);
