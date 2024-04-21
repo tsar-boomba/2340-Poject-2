@@ -3,6 +3,7 @@ package com.example.spotifywrapped;
 import static com.example.spotifywrapped.Utils.unblock;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,12 +18,15 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
+import com.dolatkia.animatedThemeManager.AppTheme;
+import com.dolatkia.animatedThemeManager.ThemeFragment;
 import com.example.spotifywrapped.databinding.FragmentSettingsBinding;
 import com.example.spotifywrapped.entities.User;
+import com.example.spotifywrapped.theme.MyAppTheme;
 import com.mohamedabulgasem.loadingoverlay.LoadingAnimation;
 import com.mohamedabulgasem.loadingoverlay.LoadingOverlay;
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends ThemeFragment {
 
     private SettingsViewModel viewModel;
     private FragmentSettingsBinding binding;
@@ -125,5 +129,28 @@ public class SettingsFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+
+    @Override
+    public void syncTheme(@NonNull AppTheme appTheme) {
+        MyAppTheme theme = (MyAppTheme) appTheme;
+        Context context = getContext();
+
+        if (context == null) {
+            return;
+        }
+
+        int textColor = theme.textColor(context);
+
+        binding.editUsername.setTextColor(theme.buttonColor(context));
+        binding.editFirstName.setBackgroundColor(textColor);
+        binding.editLastName.setBackgroundColor(theme.buttonColor(context));
+        binding.editPassword.setBackgroundColor(textColor);
+
+        binding.updateUser.setTextColor(textColor);
+        binding.updateUser.setBackgroundColor(theme.buttonColor(context));
+
+        binding.deleteUser.setTextColor(textColor);
+        binding.deleteUser.setBackgroundColor(theme.buttonColor(context));
     }
 }
