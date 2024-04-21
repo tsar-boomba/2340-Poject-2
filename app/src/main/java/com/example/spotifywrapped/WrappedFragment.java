@@ -1,8 +1,10 @@
 package com.example.spotifywrapped;
 
+import static com.example.spotifywrapped.Utils.dialogTitle;
 import static com.example.spotifywrapped.Utils.unblock;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +24,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
+import com.dolatkia.animatedThemeManager.AppTheme;
+import com.dolatkia.animatedThemeManager.ThemeFragment;
 import com.example.spotifywrapped.databinding.FragmentWrappedBinding;
 import com.example.spotifywrapped.databinding.TrackBinding;
 import com.example.spotifywrapped.entities.User;
@@ -30,6 +35,7 @@ import com.example.spotifywrapped.spotify.Spotify;
 import com.example.spotifywrapped.spotify.Timeframe;
 import com.example.spotifywrapped.spotify.TopTracks;
 import com.example.spotifywrapped.spotify.Track;
+import com.example.spotifywrapped.theme.MyAppTheme;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
 import com.google.ai.client.generativeai.type.Content;
@@ -52,7 +58,7 @@ import java.util.stream.Collectors;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-public class WrappedFragment extends Fragment {
+public class WrappedFragment extends ThemeFragment {
     private static final String TAG = "WrappedFragment";
     private static final String GEMINI = "AIzaSyCHZHjXLwmeYgmwdQ1sFKqwTsnemEpTFXg";
     private WrappedViewModel viewModel;
@@ -98,17 +104,24 @@ public class WrappedFragment extends Fragment {
         viewModel.setWrapped(preMadeWrapped);
 
         viewModel.getMessage().observe(getViewLifecycleOwner(), (llmMessage) -> {
+            MainActivity activity = (MainActivity) getActivity();
             loadingOverlay.dismiss();
-            if (llmMessage == null) {
+            if (llmMessage == null || activity == null) {
                 return;
             }
 
             String prompt = llmMessage.first;
             String result = llmMessage.second;
 
-            new AlertDialog.Builder(requireActivity())
-                    .setTitle("The LLM Says")
-                    .setMessage("Prompt: " + prompt + "\n\n" + result)
+            ScrollView scrollView = new ScrollView(activity);
+            scrollView.setPadding(8, 0, 8, 8);
+            TextView textView = new TextView(activity);
+            textView.setText("Prompt: " + prompt + "\n\n" + result);
+            scrollView.addView(textView);
+
+            new AlertDialog.Builder(activity)
+                    .setCustomTitle(dialogTitle(activity, activity.getCurrentTheme(), "The LLM Says"))
+                    .setView(scrollView)
                     .setPositiveButton("Awesome!", (d, i) -> {
                         d.dismiss();
                     })
@@ -289,5 +302,26 @@ public class WrappedFragment extends Fragment {
         super.onDestroy();
         binding = null;
         viewModel = null;
+    }
+
+    @Override
+    public void syncTheme(@NonNull AppTheme appTheme) {
+        MyAppTheme theme = (MyAppTheme) appTheme;
+        Context context = getContext();
+
+        if (context == null) {
+            return;
+        }
+
+        int textColor = theme.textColor(context);
+
+        binding.askLlmButton.setTextColor(textColor);
+        binding.askLlmButton.setBackgroundColor(theme.buttonColor(context));
+
+        binding.saveWrappedAsLabel.setTextColor(textColor);
+
+        binding.saveWrappedAs.setTextColor(textColor);
+        binding.saveWrappedButton.setTextColor(textColor);
+        binding.saveWrappedButton.setBackgroundColor(theme.buttonColor(context));
     }
 }

@@ -1,5 +1,6 @@
 package com.example.spotifywrapped;
 
+import static com.example.spotifywrapped.Utils.dialogTitle;
 import static com.example.spotifywrapped.Utils.unblock;
 
 import androidx.lifecycle.ViewModelProvider;
@@ -18,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dolatkia.animatedThemeManager.AppTheme;
@@ -46,7 +48,6 @@ public class MainFragment extends ThemeFragment {
     private Spotify spotify;
     private AppDatabase db;
     private String token;
-    private User user;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -75,7 +76,11 @@ public class MainFragment extends ThemeFragment {
                 } else {
                     throw new RuntimeException("Lost Spotify client!");
                 }
-            };
+            }
+
+            User user = db.userDao().getAll().get(0);
+            viewModel.setUser(user);
+
             spotify.getTopTracks(requireActivity(), Timeframe.ONE_MONTH, (oneMonth) -> {
                 viewModel.setOneMonthTracks(oneMonth.get());
                 spotify.getTopTracks(requireActivity(), Timeframe.SIX_MONTHS, (sixMonths) -> {
@@ -94,15 +99,15 @@ public class MainFragment extends ThemeFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         MainFragmentArgs args = MainFragmentArgs.fromBundle(getArguments());
-        user = args.getUser();
         token = args.getToken();
 
         final AtomicReference<Timeframe> timeframe = new AtomicReference<>(Timeframe.ONE_MONTH);
+        MainActivity activity = (MainActivity) requireActivity();
 
         binding.createWrappedButton.setOnClickListener((e) -> {
             Log.i(TAG, "Create wrapped clicked!");
             AlertDialog dialog = new AlertDialog.Builder(requireActivity())
-                    .setTitle("Create a Wrapped - Pick a time frame")
+                    .setCustomTitle(dialogTitle(activity, activity.getCurrentTheme(), "Create a new Wrapped - Select A Time Frame"))
                     .setSingleChoiceItems(new String[] {"One Month", "Six Months", "One Year"}, 0, (d, i) -> {
                         if (i == 0) {
                             timeframe.set(Timeframe.ONE_MONTH);
@@ -144,6 +149,10 @@ public class MainFragment extends ThemeFragment {
 
         binding.viewWrappedButton.setOnClickListener((e) -> {
             Log.i(TAG, "View wrapped clicked!");
+            User user = viewModel.getUser().getValue();
+            if (user == null) {
+                return;
+            }
             final List<Wrapped> wrappeds = user.deserializeWrappeds();
 
             if (wrappeds.size() < 1) {
@@ -154,13 +163,14 @@ public class MainFragment extends ThemeFragment {
             AtomicReference<Wrapped> selected = new AtomicReference<>(wrappeds.get(0));
 
             new AlertDialog.Builder(requireActivity())
-                    .setTitle("View A Saved Wrapped - Select One")
+                    .setCustomTitle(dialogTitle(activity, activity.getCurrentTheme(), "View A Saved Wrapped - Select One"))
                     .setAdapter(new Wrapped.Adapter(wrappeds), (d, i) -> {
                         Wrapped wrapped = wrappeds.get(i);
                         Log.i(TAG, "onViewCreated: " + selected.get());
 
                         Gson gson = new Gson();
                         NavDirections nav = MainFragmentDirections.actionMainFragmentToWrappedFragment(
+                                // This doesn't matter for viewing a saved wrapped
                                 gson.toJson(viewModel.getTopTracks().getValue().getOneMonthTracks()),
                                 gson.toJson(wrapped),
                                 wrapped.timeframe

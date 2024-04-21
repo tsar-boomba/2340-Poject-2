@@ -24,6 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/edit_username_label"
             android:labelFor="@+id/edit_username"
             android:text="Username" />
 
@@ -44,6 +45,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/edit_first_name_label"
             android:labelFor="@+id/edit_first_name"
             android:text="First Name" />
 
@@ -64,6 +66,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/edit_last_name_label"
             android:labelFor="@+id/edit_last_name"
             android:text="Last Name" />
 
@@ -84,6 +87,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/edit_password_label"
             android:labelFor="@+id/edit_password"
             android:text="Password" />
 
@@ -94,6 +98,33 @@
             android:autofillHints="password"
             android:inputType="textPassword" />
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:labelFor="@id/notification_switch"
+            android:id="@+id/notification_switch_label"
+            android:text="Notifications"
+            android:layout_marginEnd="4dp"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/notification_switch"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/toggle_theme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:text="Toggle Theme"
+        />
 
     <Button
         android:id="@+id/update_user"

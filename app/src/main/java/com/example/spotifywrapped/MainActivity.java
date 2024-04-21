@@ -36,7 +36,7 @@ import java.util.Optional;
 public class MainActivity extends ThemeActivity {
     private AppDatabase db;
     private ActivityMainBinding binding;
-    private Spotify spotify = new Spotify();
+    private static Spotify spotify = new Spotify();
     private MyAppTheme theme;
 
     @Override
@@ -111,11 +111,11 @@ public class MainActivity extends ThemeActivity {
         if (light) {
             theme = new LightTheme();
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            ThemeManager.Companion.getInstance().changeTheme(new LightTheme(), transitionCenter, 800);
+            ThemeManager.Companion.getInstance().changeTheme(new LightTheme(), transitionCenter, 1600);
         } else {
             theme = new DarkTheme();
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            ThemeManager.Companion.getInstance().changeTheme(new DarkTheme(), transitionCenter, 800);
+            ThemeManager.Companion.getInstance().changeTheme(new DarkTheme(), transitionCenter, 1600);
         }
     }
 
