@@ -1,5 +1,6 @@
 package com.example.spotifywrapped;
 
+import static com.example.spotifywrapped.Utils.dialogTitle;
 import static com.example.spotifywrapped.Utils.unblock;
 
 import android.app.AlertDialog;
@@ -12,6 +13,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -102,17 +104,24 @@ public class WrappedFragment extends ThemeFragment {
         viewModel.setWrapped(preMadeWrapped);
 
         viewModel.getMessage().observe(getViewLifecycleOwner(), (llmMessage) -> {
+            MainActivity activity = (MainActivity) getActivity();
             loadingOverlay.dismiss();
-            if (llmMessage == null) {
+            if (llmMessage == null || activity == null) {
                 return;
             }
 
             String prompt = llmMessage.first;
             String result = llmMessage.second;
 
-            new AlertDialog.Builder(requireActivity())
-                    .setTitle("The LLM Says")
-                    .setMessage("Prompt: " + prompt + "\n\n" + result)
+            ScrollView scrollView = new ScrollView(activity);
+            scrollView.setPadding(8, 0, 8, 8);
+            TextView textView = new TextView(activity);
+            textView.setText("Prompt: " + prompt + "\n\n" + result);
+            scrollView.addView(textView);
+
+            new AlertDialog.Builder(activity)
+                    .setCustomTitle(dialogTitle(activity, activity.getCurrentTheme(), "The LLM Says"))
+                    .setView(scrollView)
                     .setPositiveButton("Awesome!", (d, i) -> {
                         d.dismiss();
                     })
@@ -307,19 +316,12 @@ public class WrappedFragment extends ThemeFragment {
         int textColor = theme.textColor(context);
 
         binding.askLlmButton.setTextColor(textColor);
-
-        binding.askLlmButton.setTextColor(textColor);
         binding.askLlmButton.setBackgroundColor(theme.buttonColor(context));
 
-        binding.wrappedTopTracks.setBackgroundColor(theme.buttonColor(context));
-
-        binding.wrappedTopArtists.setBackgroundColor(theme.buttonColor(context));
-
-        binding.saveWrappedAsLabel.setBackgroundColor(theme.buttonColor(context));
+        binding.saveWrappedAsLabel.setTextColor(textColor);
 
         binding.saveWrappedAs.setTextColor(textColor);
-        binding.saveWrappedButton.setTextColor(theme.buttonColor(context));
-        binding.saveWrappedAsLabel.setBackgroundColor(theme.buttonColor(context));
-
+        binding.saveWrappedButton.setTextColor(textColor);
+        binding.saveWrappedButton.setBackgroundColor(theme.buttonColor(context));
     }
 }

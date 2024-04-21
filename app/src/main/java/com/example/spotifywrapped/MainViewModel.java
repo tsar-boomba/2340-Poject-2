@@ -1,6 +1,7 @@
 package com.example.spotifywrapped;
 
 import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -14,7 +15,7 @@ public class MainViewModel extends ViewModel {
     private final MutableLiveData<User> user = new MutableLiveData<>(null);
     private final MutableLiveData<AllTopTracks> topTracks = new MutableLiveData<>(new AllTopTracks(null, null, null));
 
-    public MutableLiveData<User> getUser() {
+    public LiveData<User> getUser() {
         return user;
     }
 
@@ -22,7 +23,7 @@ public class MainViewModel extends ViewModel {
         this.user.postValue(user);
     }
 
-    public MutableLiveData<AllTopTracks> getTopTracks() {
+    public LiveData<AllTopTracks> getTopTracks() {
         return topTracks;
     }
 

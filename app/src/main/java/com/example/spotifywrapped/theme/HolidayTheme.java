@@ -34,6 +34,11 @@ public class HolidayTheme implements MyAppTheme {
     }
 
     public static Optional<HolidayTheme> getHolidayTheme(LocalDateTime dateTime) {
+        // For demonstration purposes
+        if (true) {
+            return Optional.of(christmas());
+        }
+
         LocalDate date = dateTime.toLocalDate();
         if (date.getMonth() == Month.DECEMBER && date.getDayOfMonth() == 25) {
             return Optional.of(christmas());
@@ -92,6 +97,6 @@ public class HolidayTheme implements MyAppTheme {
     }
 
     public int buttonColor(@NonNull Context context) {
-        return ContextCompat.getColor(context, R.color.button_light);
+        return backgroundColor2.toArgb();
     }
 }
