@@ -3,6 +3,7 @@ package com.example.spotifywrapped;
 import static com.example.spotifywrapped.Utils.unblock;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,16 +19,19 @@ import androidx.navigation.NavAction;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
+import com.dolatkia.animatedThemeManager.AppTheme;
+import com.dolatkia.animatedThemeManager.ThemeFragment;
 import com.example.spotifywrapped.databinding.FragmentLoginBinding;
 import com.example.spotifywrapped.entities.User;
 import com.example.spotifywrapped.spotify.Spotify;
 import com.example.spotifywrapped.spotify.Timeframe;
+import com.example.spotifywrapped.theme.MyAppTheme;
 import com.mohamedabulgasem.loadingoverlay.LoadingAnimation;
 import com.mohamedabulgasem.loadingoverlay.LoadingOverlay;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LoginFragment extends Fragment {
+public class LoginFragment extends ThemeFragment {
     private static final String TAG = "LoginFragment";
     private FragmentLoginBinding binding;
     private Spotify spotify;
@@ -249,5 +253,34 @@ public class LoginFragment extends Fragment {
         binding = null;
         spotify = null;
         loadingOverlay = null;
+    }
+
+    @Override
+    public void syncTheme(@NonNull AppTheme appTheme) {
+        MyAppTheme theme = (MyAppTheme) appTheme;
+        Context context = getContext();
+
+        if (context == null) {
+            return;
+        }
+
+        int textColor = theme.textColor(context);
+
+        binding.loginTitle.setTextColor(textColor);
+
+        binding.loginButton.setTextColor(textColor);
+        binding.loginButton.setBackgroundColor(theme.buttonColor(context));
+
+        binding.createFirstNameLabel.setTextColor(textColor);
+        binding.createFirstName.setTextColor(textColor);
+
+        binding.createLastNameLabel.setTextColor(textColor);
+        binding.createLastName.setTextColor(textColor);
+
+        binding.createUsernameLabel.setTextColor(textColor);
+        binding.createUsername.setTextColor(textColor);
+
+        binding.createPasswordLabel.setTextColor(textColor);
+        binding.createPassword.setTextColor(textColor);
     }
 }

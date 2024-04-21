@@ -37,6 +37,7 @@ android {
 }
 
 dependencies {
+    implementation("com.dolatkia:animated-theme-manager:1.1.4")
     implementation("com.google.ai.client.generativeai:generativeai:0.3.0")
     implementation("com.google.guava:guava:31.0.1-android")
     implementation("org.reactivestreams:reactive-streams:1.0.4")

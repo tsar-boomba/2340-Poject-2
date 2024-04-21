@@ -2,12 +2,11 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="Theme.SpotifyWrapped" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="Theme.SpotifyWrapped" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:state_focused">@color/button_light</item>
+        <item name="android:colorFocusedHighlight">@color/button_light</item>
     </style>
 
 </resources>

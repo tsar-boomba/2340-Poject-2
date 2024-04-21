@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:padding="16dp"
         app:flow_verticalGap="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,6 +24,7 @@
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/login_title"
             android:text="Welcome To Spotify Wrapped!"/>
 
         <LinearLayout
@@ -35,6 +37,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/create_username_label"
                 android:labelFor="@+id/create_username"
                 android:text="Username" />
 
@@ -56,6 +59,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/create_first_name_label"
                 android:labelFor="@+id/create_first_name"
                 android:text="First Name" />
 
@@ -76,6 +80,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/create_last_name_label"
                 android:labelFor="@+id/create_last_name"
                 android:text="Last Name" />
 
@@ -96,6 +101,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/create_password_label"
                 android:labelFor="@+id/create_password"
                 android:text="Password" />
 

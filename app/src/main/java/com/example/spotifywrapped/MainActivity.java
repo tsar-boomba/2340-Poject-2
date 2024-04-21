@@ -6,8 +6,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.CompoundButton;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -17,17 +19,31 @@ import androidx.fragment.app.FragmentContainerView;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.room.Room;
 
+import com.dolatkia.animatedThemeManager.AppTheme;
+import com.dolatkia.animatedThemeManager.ThemeActivity;
+import com.dolatkia.animatedThemeManager.ThemeManager;
 import com.example.spotifywrapped.databinding.ActivityMainBinding;
 import com.example.spotifywrapped.spotify.Spotify;
+import com.example.spotifywrapped.theme.DarkTheme;
+import com.example.spotifywrapped.theme.HolidayTheme;
+import com.example.spotifywrapped.theme.LightTheme;
+import com.example.spotifywrapped.theme.MyAppTheme;
 
-public class MainActivity extends AppCompatActivity {
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Optional;
+
+public class MainActivity extends ThemeActivity {
     private AppDatabase db;
+    private ActivityMainBinding binding;
     private Spotify spotify = new Spotify();
+    private MyAppTheme theme;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         db = Room.databaseBuilder(this, AppDatabase.class, "db")
                 .fallbackToDestructiveMigrationOnDowngrade()
@@ -37,25 +53,6 @@ public class MainActivity extends AppCompatActivity {
         // Use for clearing database in development
 //        unblock(() -> {
 //            db.clearAllTables();
-//        });
-
-//        switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-//            @Override
-//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//                if (isChecked){
-//                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-//                    switchCompat.setChecked(true);
-//                    SharedPreferences.Editor editor = sharedPreferences.edit();
-//                    editor.putBoolean("night_mode",true);
-//                    editor.apply();
-//                }else {
-//                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-//                    switchCompat.setChecked(false);
-//                    SharedPreferences.Editor editor = sharedPreferences.edit();
-//                    editor.putBoolean("night_mode",false);
-//                    editor.apply();
-//                }
-//            }
 //        });
     }
 
@@ -100,11 +97,58 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         db = null;
+        binding = null;
     }
 
     public Spotify createSpotifyFromToken(String token) {
         spotify = new Spotify();
         spotify.setAccessToken(token);
         return spotify;
+    }
+
+    public void setTheme(boolean light, View transitionCenter) {
+        getPreferences(MODE_PRIVATE).edit().putBoolean("light", light).apply();
+        if (light) {
+            theme = new LightTheme();
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            ThemeManager.Companion.getInstance().changeTheme(new LightTheme(), transitionCenter, 800);
+        } else {
+            theme = new DarkTheme();
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            ThemeManager.Companion.getInstance().changeTheme(new DarkTheme(), transitionCenter, 800);
+        }
+    }
+
+    public MyAppTheme getCurrentTheme() {
+        return theme;
+    }
+
+    @NonNull
+    @Override
+    public AppTheme getStartTheme() {
+        Optional<HolidayTheme> holidayTheme = HolidayTheme.getHolidayTheme(LocalDateTime.now());
+
+        if (holidayTheme.isPresent()) {
+            theme = holidayTheme.get();
+            return theme;
+        }
+
+        boolean lightTheme = getPreferences(MODE_PRIVATE).getBoolean("light", false);
+
+        if (lightTheme) {
+            theme = new LightTheme();
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            return theme;
+        } else {
+            theme = new DarkTheme();
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            return theme;
+        }
+    }
+
+    @Override
+    public void syncTheme(@NonNull AppTheme appTheme) {
+        MyAppTheme theme = (MyAppTheme) appTheme;
+        binding.getRoot().setBackgroundColor(theme.bgColor(this));
     }
 }

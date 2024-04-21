@@ -5,6 +5,7 @@ import static com.example.spotifywrapped.Utils.unblock;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,12 +20,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.dolatkia.animatedThemeManager.AppTheme;
+import com.dolatkia.animatedThemeManager.ThemeFragment;
 import com.example.spotifywrapped.databinding.FragmentMainBinding;
 import com.example.spotifywrapped.entities.User;
 import com.example.spotifywrapped.entities.Wrapped;
 import com.example.spotifywrapped.spotify.Spotify;
 import com.example.spotifywrapped.spotify.Timeframe;
 import com.example.spotifywrapped.spotify.TopTracks;
+import com.example.spotifywrapped.theme.MyAppTheme;
 import com.google.gson.Gson;
 import com.mohamedabulgasem.loadingoverlay.LoadingAnimation;
 import com.mohamedabulgasem.loadingoverlay.LoadingOverlay;
@@ -34,7 +38,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends ThemeFragment {
     private static final String TAG = "MainFragment";
     private MainViewModel viewModel;
     private FragmentMainBinding binding;
@@ -188,5 +192,27 @@ public class MainFragment extends Fragment {
                 loadingOverlay.dismiss();
             }
         });
+    }
+
+    @Override
+    public void syncTheme(@NonNull AppTheme appTheme) {
+        MyAppTheme theme = (MyAppTheme) appTheme;
+        Context context = getContext();
+
+        if (context == null) {
+            return;
+        }
+
+        int textColor = theme.textColor(context);
+        int buttonColor = theme.buttonColor(context);
+
+        binding.settingsButton.setTextColor(textColor);
+        binding.settingsButton.setBackgroundColor(buttonColor);
+
+        binding.viewWrappedButton.setTextColor(textColor);
+        binding.viewWrappedButton.setBackgroundColor(buttonColor);
+
+        binding.createWrappedButton.setTextColor(textColor);
+        binding.createWrappedButton.setBackgroundColor(buttonColor);
     }
 }
