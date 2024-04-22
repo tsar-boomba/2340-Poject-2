@@ -19,13 +19,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
 import com.dolatkia.animatedThemeManager.AppTheme;
+import com.dolatkia.animatedThemeManager.Coordinate;
 import com.dolatkia.animatedThemeManager.ThemeFragment;
+import com.dolatkia.animatedThemeManager.ThemeManager;
 import com.example.spotifywrapped.databinding.FragmentWrappedBinding;
 import com.example.spotifywrapped.databinding.TrackBinding;
 import com.example.spotifywrapped.entities.User;
@@ -35,6 +36,7 @@ import com.example.spotifywrapped.spotify.Spotify;
 import com.example.spotifywrapped.spotify.Timeframe;
 import com.example.spotifywrapped.spotify.TopTracks;
 import com.example.spotifywrapped.spotify.Track;
+import com.example.spotifywrapped.theme.HolidayTheme;
 import com.example.spotifywrapped.theme.MyAppTheme;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
@@ -46,6 +48,7 @@ import com.mohamedabulgasem.loadingoverlay.LoadingAnimation;
 import com.mohamedabulgasem.loadingoverlay.LoadingOverlay;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -67,6 +70,8 @@ public class WrappedFragment extends ThemeFragment {
     private AppDatabase db;
     private Spotify spotify;
     private boolean saved = false;
+    private Optional<HolidayTheme> holidayTheme;
+    private MyAppTheme previousTheme;
 
     public static WrappedFragment newInstance() {
         return new WrappedFragment();
@@ -84,6 +89,9 @@ public class WrappedFragment extends ThemeFragment {
         spotify = ((MainActivity) requireActivity()).getSpotify();
         db = ((MainActivity) requireActivity()).getDb();
         loadingOverlay = LoadingOverlay.Companion.with(requireActivity(), LoadingAnimation.BuiltinAnimations.getLOADING_SPINNER(), 0.5f, false, null, null, null);
+        MainActivity activity = (MainActivity) requireActivity();
+        previousTheme = (MyAppTheme) activity.getStartTheme();
+
         return binding.getRoot();
     }
 
@@ -136,6 +144,15 @@ public class WrappedFragment extends ThemeFragment {
             if (wrappedOpt.isPresent()) {
                 // Setup UI for wrapped
                 Wrapped wrapped = wrappedOpt.get();
+
+                Optional<HolidayTheme> wrappedTheme = Optional.ofNullable(wrapped.themeName).flatMap(HolidayTheme::fromString);
+
+                if (wrappedTheme.isPresent()) {
+                    Log.i(TAG, "onViewCreated: setting to holiday");
+                    holidayTheme = wrappedTheme;
+                    ThemeManager.Companion.getInstance().changeTheme(wrappedTheme.get(), getView(), 1000);
+                }
+
                 Log.i(TAG, wrapped.toString());
 
                 for (int i = 0; i < wrapped.topTracks.length; i++) {
@@ -264,7 +281,8 @@ public class WrappedFragment extends ThemeFragment {
                 loadingOverlay.show();
 
                 unblock(() -> {
-                    viewModel.setWrapped(Optional.of(Wrapped.fromTopTracks(spotify, topTracks, timeframe, 10)));
+                    Wrapped wrapped = Wrapped.fromTopTracks(spotify, topTracks, timeframe, HolidayTheme.getHolidayTheme(LocalDateTime.now()).map(Enum::name).orElse(null), 10);
+                    viewModel.setWrapped(Optional.of(wrapped));
                 });
             }
         });
@@ -300,6 +318,11 @@ public class WrappedFragment extends ThemeFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        if (ThemeManager.Companion.getInstance().getCurrentTheme().getClass() == HolidayTheme.class) {
+            ThemeManager.Companion.getInstance().changeTheme(previousTheme, new Coordinate(0, 0), 1000, true);
+        }
+
         binding = null;
         viewModel = null;
     }

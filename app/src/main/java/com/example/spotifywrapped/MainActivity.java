@@ -126,13 +126,6 @@ public class MainActivity extends ThemeActivity {
     @NonNull
     @Override
     public AppTheme getStartTheme() {
-        Optional<HolidayTheme> holidayTheme = HolidayTheme.getHolidayTheme(LocalDateTime.now());
-
-        if (holidayTheme.isPresent()) {
-            theme = holidayTheme.get();
-            return theme;
-        }
-
         boolean lightTheme = getPreferences(MODE_PRIVATE).getBoolean("light", false);
 
         if (lightTheme) {

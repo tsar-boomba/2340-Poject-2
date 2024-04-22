@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.example.spotifywrapped.databinding.WrappedBinding;
 import com.example.spotifywrapped.spotify.Artist;
@@ -16,6 +17,7 @@ import com.example.spotifywrapped.spotify.Spotify;
 import com.example.spotifywrapped.spotify.Timeframe;
 import com.example.spotifywrapped.spotify.TopTracks;
 import com.example.spotifywrapped.spotify.Track;
+import com.example.spotifywrapped.theme.HolidayTheme;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Wrapped {
@@ -35,6 +38,8 @@ public class Wrapped {
     public String createdAt;
     public String name;
     public Timeframe timeframe;
+    @Nullable
+    public String themeName;
 
     public static class Adapter implements ListAdapter {
         private List<Wrapped> wrappeds;
@@ -117,10 +122,11 @@ public class Wrapped {
     }
 
     @NonNull
-    public static Wrapped fromTopTracks(Spotify spotify, TopTracks topTracks, Timeframe timeframe, int numTracks) {
+    public static Wrapped fromTopTracks(Spotify spotify, TopTracks topTracks, Timeframe timeframe, @Nullable String themeName, int numTracks) {
         Log.i(TAG, "fromTopTracks: " + topTracks);
         Wrapped wrapped = new Wrapped();
         wrapped.timeframe = timeframe;
+        wrapped.themeName = themeName;
         wrapped.createdAt = LocalDateTime.now().toString();
 
         HashMap<Artist, Integer> artistToAppearances = new HashMap<>();
